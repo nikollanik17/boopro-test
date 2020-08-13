@@ -1,21 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { StyleSheet, SafeAreaView } from "react-native";
+import Genres from "./components/Genres/Genres";
+import Login from "./components/Login/Login";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  const [valid, setValid] = useState(false);
+
+  const loginValidationHandler = (param) => {
+    setValid(param);
+  };
+
+  let content = <Login onLogin={loginValidationHandler} />;
+
+  if (valid) {
+    content = <Genres />;
+  }
+
+  return <SafeAreaView style={styles.screen}>{content}</SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
