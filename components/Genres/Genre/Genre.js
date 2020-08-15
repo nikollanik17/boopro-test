@@ -8,18 +8,27 @@ import {
   TouchableOpacity,
   Modal,
   Button,
+  BackHandler,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import axios from "axios";
+
+import { useSelector, useDispatch } from "react-redux";
+import * as moviesActios from "../../../store/actions/movies";
 
 const Genre = (props) => {
   const [state, setState] = useState({
     movies: [],
   });
 
+  // const state = useSelector((state) => state.movies);
+
   //za modal
   const [isActive, setIsActive] = useState(false);
+
+  // const dispatch = useDispatch();
 
   useEffect(() => {
     axios
@@ -39,45 +48,53 @@ const Genre = (props) => {
           };
         });
       });
+
+    //redux
+    // dispatch(moviesActios.getMovies(props.id));
   }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.genreTitle}>{props.genre}</Text>
-      {state.movies.map((movie) => (
-        <View style={styles.movie} key={movie.id}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => {
-              props.onMovieClick(movie);
-              setIsActive(true);
-            }}
-          >
-            <View
-              style={
-                props.activeMovie.id === movie.id ? styles.imageContainer : ""
-              }
+      <ScrollView horizontal={true}>
+        {state.movies.map((movie) => (
+          <View style={styles.movie} key={movie.id}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                props.onMovieClick(movie);
+                setIsActive(true);
+              }}
             >
-              <Image
-                source={{
-                  uri: `http://image.tmdb.org/t/p/w500/${movie.poster_path}`,
-                }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            </View>
-          </TouchableOpacity>
-          {props.activeMovie.id === movie.id ? (
-            <View style={styles.movieDetails}>
-              <Text style={styles.title}>{movie.original_title}</Text>
-            </View>
-          ) : null}
-        </View>
-      ))}
+              <View
+                style={
+                  props.activeMovie.id === movie.id ? styles.imageContainer : ""
+                }
+              >
+                <Image
+                  source={{
+                    uri: `http://image.tmdb.org/t/p/w500/${movie.poster_path}`,
+                  }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </View>
+            </TouchableOpacity>
+            {props.activeMovie.id === movie.id ? (
+              <View style={styles.movieDetails}>
+                <Text style={styles.title}>{movie.original_title}</Text>
+              </View>
+            ) : null}
+          </View>
+        ))}
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={false}
         visible={isActive ? true : false}
+        onRequestClose={() => {
+          setIsActive(false);
+        }}
       >
         <View style={styles.popup}>
           <ScrollView>
@@ -122,12 +139,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 20,
-    paddingHorizontal: 50,
+    // paddingHorizontal: 50,
   },
   movie: {
     flex: 1,
-    width: "100%",
-    marginBottom: 20,
+    width: Dimensions.get("window").width - 60,
+    height: Dimensions.get("window").height / 1.5,
+    marginHorizontal: 30,
   },
   title: {
     color: "#fff",
@@ -138,7 +156,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 300,
+    height: Dimensions.get("window").height / 1.7,
   },
   imageContainer: {
     borderColor: "red",
