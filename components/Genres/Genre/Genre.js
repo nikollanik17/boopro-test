@@ -16,77 +16,71 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 
 import { useSelector, useDispatch } from "react-redux";
-import * as moviesActios from "../../../store/actions/movies";
+import * as moviesActions from "../../../store/actions/movies";
 
 const Genre = (props) => {
-  const [state, setState] = useState({
-    movies: [],
-  });
-
-  // const state = useSelector((state) => state.movies);
+  const movies = useSelector((state) => state.movies.movies);
 
   //za modal
   const [isActive, setIsActive] = useState(false);
 
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    axios
-      .get(
-        `https://api.themoviedb.org/3/discover/movie?with_genres=${props.id}&api_key=d38aa8716411ef7d8e9054b34a6678ac`
-      )
-      .then(({ data }) => {
-        const updatedMovies = data.results.slice(0, 5);
-        //stavljamo custom id za svaki film da bi svaki imao razliciti id, da se ne bi desilo da u 2 zanra isti film bude aktivan
-        updatedMovies.forEach((el) => {
-          el.id = props.id + "-" + el.id;
-        });
-        setState((prevState) => {
-          return {
-            ...prevState,
-            movies: updatedMovies,
-          };
-        });
-      });
-
     //redux
-    // dispatch(moviesActios.getMovies(props.id));
+    dispatch(moviesActions.getMovies(props.id));
   }, []);
+
+  const movies_genre_id = movies.filter((movie) => movie.key === props.id);
+
+  let mvs = null;
+
+  if (movies_genre_id.length !== 0) {
+    mvs = movies_genre_id[0].value.slice(0, 5);
+    //stavljamo custom id za svaki film da se ne bi desilo da neki film u isto vreme bude aktivan u dva razlicita zanra
+    mvs.forEach((element) => {
+      element.id = props.id + "-" + element.id;
+    });
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.genreTitle}>{props.genre}</Text>
       <ScrollView horizontal={true}>
-        {state.movies.map((movie) => (
-          <View style={styles.movie} key={movie.id}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => {
-                props.onMovieClick(movie);
-                setIsActive(true);
-              }}
-            >
-              <View
-                style={
-                  props.activeMovie.id === movie.id ? styles.imageContainer : ""
-                }
-              >
-                <Image
-                  source={{
-                    uri: `http://image.tmdb.org/t/p/w500/${movie.poster_path}`,
+        {mvs
+          ? mvs.map((movie) => (
+              <View style={styles.movie} key={movie.id}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    props.onMovieClick(movie);
+                    setIsActive(true);
                   }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
+                >
+                  <View
+                    style={
+                      props.activeMovie.id === movie.id
+                        ? styles.imageContainer
+                        : ""
+                    }
+                  >
+                    <Image
+                      source={{
+                        uri: `http://image.tmdb.org/t/p/w500/${movie.poster_path}`,
+                      }}
+                      style={styles.image}
+                      resizeMode="cover"
+                    />
+                  </View>
+                </TouchableOpacity>
+                {props.activeMovie.id === movie.id ? (
+                  <View style={styles.movieDetails}>
+                    <Text style={styles.title}>{movie.original_title}</Text>
+                  </View>
+                ) : null}
               </View>
-            </TouchableOpacity>
-            {props.activeMovie.id === movie.id ? (
-              <View style={styles.movieDetails}>
-                <Text style={styles.title}>{movie.original_title}</Text>
-              </View>
-            ) : null}
-          </View>
-        ))}
+            ))
+          : null}
       </ScrollView>
       <Modal
         animationType="slide"

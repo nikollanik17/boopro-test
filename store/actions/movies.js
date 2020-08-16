@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const GET_MOVIES = "GET_MOVIES";
 
 export const getMovies = (genre_id) => {
@@ -9,11 +11,12 @@ export const getMovies = (genre_id) => {
       .then(({ data }) => {
         dispatch({
           type: GET_MOVIES,
-          movies: data,
+          movies: data.results,
+          genre_id: genre_id,
         });
       })
       .catch((error) => {
-        throw error;
+        console.log(error);
       });
   };
 };
